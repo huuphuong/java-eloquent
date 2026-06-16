@@ -75,6 +75,7 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gpg.executable>C:\Program Files\GnuPG\bin\gpg.exe</gpg.executable>
     </properties>
 
     <build>
@@ -137,7 +138,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.8</version>
+                <version>3.1.0</version>
+                <configuration>
+                    <bestPractices>true</bestPractices>
+                    <executable>${gpg.executable}</executable>
+                </configuration>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
