@@ -26,7 +26,7 @@ If you want to publish this project as a Maven artifact, the current coordinates
 ```xml
 <groupId>io.github.phuonghuu</groupId>
 <artifactId>java-eloquent</artifactId>
-<version>1.0-SNAPSHOT</version>
+<version>0.1.1</version>
 ```
 
 Before publishing a release, replace the snapshot version with a real release version such as `1.0.0`.
