@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eloquent Guide</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-grad: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+            --panel: rgba(17, 24, 39, 0.92);
+            --panel-2: rgba(17, 24, 39, 0.7);
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #38bdf8;
+            --accent-2: #22c55e;
+            --border: rgba(255, 255, 255, 0.08);
+            --code: #020617;
+            --card: rgba(2, 6, 23, 0.55);
+            --hero: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(34,197,94,0.12));
+            --input-bg: rgba(255,255,255,0.04);
+            --input-text: #e5e7eb;
+            --input-placeholder: #94a3b8;
+            --toggle-bg: rgba(255,255,255,0.06);
+        }
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --bg-grad: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+            --panel: rgba(255, 255, 255, 0.92);
+            --panel-2: rgba(255, 255, 255, 0.8);
+            --text: #0f172a;
+            --muted: #475569;
+            --accent: #0284c7;
+            --accent-2: #16a34a;
+            --border: rgba(15, 23, 42, 0.1);
+            --code: #0f172a;
+            --card: rgba(255, 255, 255, 0.75);
+            --hero: linear-gradient(135deg, rgba(2,132,199,0.10), rgba(22,163,74,0.08));
+            --input-bg: rgba(15,23,42,0.04);
+            --input-text: #0f172a;
+            --input-placeholder: #64748b;
+            --toggle-bg: rgba(15,23,42,0.06);
+        }
+        [data-theme="light"] .chip {
+            filter: saturate(1.5) brightness(0.5);
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; background: var(--bg-grad); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        a { color: inherit; text-decoration: none; }
+        .layout { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 300px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow: auto;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 24px 18px;
+            backdrop-filter: blur(10px);
+        }
+        .sidebar-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+        .toolbar {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .nav-filter {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: var(--input-bg);
+            color: var(--input-text);
+            outline: none;
+        }
+        .nav-filter::placeholder {
+            color: var(--input-placeholder);
+        }
+        .nav-group {
+            margin: 18px 0 24px;
+        }
+        .nav-title {
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            margin: 0 0 10px;
+        }
+        .nav-list { display: grid; gap: 6px; }
+        .nav-list a {
+            display: block;
+            padding: 10px 12px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--text);
+            background: rgba(255,255,255,0.02);
+        }
+        .nav-list a:hover {
+            border-color: rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.08);
+        }
+        .content {
+            flex: 1;
+            padding: 40px 40px 80px;
+        }
+        .hero {
+            background: var(--hero);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 28px;
+            position: relative;
+        }
+        .hero-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .theme-toggle {
+            border: 1px solid var(--border);
+            background: var(--toggle-bg);
+            color: var(--text);
+            border-radius: 999px;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            font: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex: 0 0 auto;
+        }
+        .theme-toggle:hover {
+            border-color: rgba(56, 189, 248, 0.35);
+        }
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        h1, h2, h3 { margin: 0 0 12px; line-height: 1.2; }
+        h1 { font-size: 32px; }
+        h2 { font-size: 24px; margin-top: 30px; }
+        h3 { font-size: 18px; margin-top: 24px; }
+        p { color: var(--text); line-height: 1.7; margin: 0 0 14px; }
+        .muted { color: var(--muted); }
+        .section {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--panel-2);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            color: #bae6fd;
+        }
+        .chip.ok {
+            background: rgba(34, 197, 94, 0.12);
+            border-color: rgba(34, 197, 94, 0.2);
+            color: #bbf7d0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            background: var(--card);
+        }
+        code, pre {
+            font-family: Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+        }
+        pre {
+            background: var(--code);
+            color: #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.6;
+            margin: 14px 0 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .anchor { scroll-margin-top: 20px; }
+        .note {
+            border-left: 4px solid var(--accent);
+            background: rgba(56, 189, 248, 0.08);
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: var(--text);
+            margin: 14px 0;
+        }
+        .warn {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.08);
+        }
+        ul { margin: 10px 0 0 20px; color: var(--text); line-height: 1.7; }
+        li { margin-bottom: 6px; }
+        .footer {
+            margin-top: 28px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        @media (max-width: 980px) {
+            .layout { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .content { padding: 24px 16px 64px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div>
+                <div class="brand">Eloquent Guide</div>
+                <div class="subtitle">
+                    Eloquent-style relation toolkit for Java 17+, Spring Boot 3+, PostgreSQL, and NamedParameterJdbcTemplate.
+                </div>
+            </div>
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+                <span id="themeToggleIcon" aria-hidden="true"></span>
+            </button>
+        </div>
+
+        <div class="toolbar">
+            <input class="nav-filter" id="navFilter" type="search" placeholder="Filter methods..." aria-label="Filter sidebar links" />
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-title">Overview</div>
+            <div class="nav-list">
+                <a href="#overview">What this kit does</a>
+                <a href="#setup">Setup</a>
+                <a href="#query">Query builder</a>
+                <a href="#relations">Relations</a>
+                <a href="#with">Eager loading</a>
+                <a href="#write">Write / mutation</a>
+                <a href="#terminal">Terminal methods</a>
+                <a href="#paging">Pagination</a>
+                <a href="#sql">SQL preview</a>
+                <a href="#examples">Examples</a>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-title">Methods</div>
+            <div class="nav-list">
+                <a href="#method-select">select</a>
+                <a href="#method-where">where / orWhere</a>
+                <a href="#method-raw">whereRaw</a>
+                <a href="#method-null">whereNull / whereNotNull</a>
+                <a href="#method-between">whereBetween</a>
+                <a href="#method-like">whereLike</a>
+                <a href="#method-date">whereDate</a>
+                <a href="#method-json">whereJson</a>
+                <a href="#method-in">whereIn</a>
+                <a href="#method-has">whereHas</a>
+                <a href="#method-with">with</a>
+                <a href="#method-order">orderBy</a>
+                <a href="#method-page">page / size / limit / offset</a>
+                <a href="#method-first-find">first / find</a>
+                <a href="#method-paginate">paginate</a>
+                <a href="#method-cursor">cursorPaginate</a>
+                <a href="#method-create">create / createMany</a>
+                <a href="#method-update">update / updatePartial / updatePartialByMap / updatePartialByMap(id) / upsert</a>
+                <a href="#method-pivot-attach">attach / detach</a>
+                <a href="#method-pivot-sync">sync / syncWithoutDetaching</a>
+                <a href="#method-mutation-preview">mutation SQL preview</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="content">
+        <section class="hero anchor" id="overview">
+            <h1>Eloquent</h1>
+            <p class="muted">
+                A lightweight Eloquent-style relation kit for Java. It is not an ORM replacement.
+                The goal is explicit SQL, batch loading, eager loading, and relation metadata with no Hibernate/JPA dependency.
+            </p>
+            <div class="chips">
+                <span class="chip">Java 17+</span>
+                <span class="chip">Spring Boot 3+</span>
+                <span class="chip">PostgreSQL</span>
+                <span class="chip ok">NamedParameterJdbcTemplate</span>
+            </div>
+        </section>
+
+        <section class="section anchor" id="setup">
+            <h2>Setup</h2>
+            <p>
+                Register entities and relations by code inside <code>RelationRegistry</code>, then inject <code>Eloquent</code> and use
+                <code>eloquent.query(Entity.class)</code>.
+            </p>
+<pre><code>registry.forClass(Department.class)
+    .table("comission.departments")
+    .primaryKey("id")
+    .belongsToMany("users", User.class, "comission.positions", "department_id", "user_id", Department::setUsers)
+    .hasOneThroughPivot(
+        "manager",
+        User.class,
+        "comission.positions",
+        "department_id",
+        "user_id",
+        "role_code",
+        "MANAGER",
+        Department::setManager
+    )
+    .register();</code></pre>
+            <div class="note">
+                Use code registration first. No annotations are required for the current version.
+            </div>
+        </section>
+
+        <section class="section anchor" id="query">
+            <h2>Query Builder</h2>
+            <p>
+                Start a query with <code>eloquent.query(Type.class)</code>. Every method returns the same builder so you can chain filters,
+                projections, ordering, relations, and paging.
+            </p>
+            <div class="grid">
+                <div class="card anchor" id="method-select">
+                    <h3>select(...)</h3>
+                    <p>Pick specific columns on the root query or inside relation callbacks.</p>
+<pre><code>eloquent.query(Department.class)
+    .select("id", "code", "name")
+    .get();</code></pre>
+                </div>
+                <div class="card anchor" id="method-where">
+                    <h3>where(...) / orWhere(...)</h3>
+                    <p>Support equality and explicit operators. Nullable values resolve to <code>IS NULL</code>.</p>
+<pre><code>.where("status", "ACTIVE")
+.where("id", "&lt;", 10)
+.orWhere("level", "&gt;=", 2)</code></pre>
+                </div>
+                <div class="card anchor" id="method-raw">
+                    <h3>whereRaw(...)</h3>
+                    <p>Safe raw predicate with <code>?</code> placeholders and positional binding.</p>
+<pre><code>.whereRaw("level_no &gt; ? AND status = ?", List.of(3, "ACTIVE"))</code></pre>
+                </div>
+                <div class="card anchor" id="method-null">
+                    <h3>whereNull / whereNotNull</h3>
+                    <p>Null checks without manual SQL strings.</p>
+<pre><code>.whereNull("description")
+.whereNotNull("code")</code></pre>
+                </div>
+                <div class="card anchor" id="method-between">
+                    <h3>whereBetween</h3>
+                    <p>Range filter with two bound values.</p>
+<pre><code>.whereBetween("id", 1L, 100L)</code></pre>
+                </div>
+                <div class="card anchor" id="method-like">
+                    <h3>whereLike</h3>
+                    <p>LIKE predicate for pattern search.</p>
+<pre><code>.whereLike("name", "%Dept%")</code></pre>
+                </div>
+                <div class="card anchor" id="method-date">
+                    <h3>whereDate</h3>
+                    <p>Day-level filtering for date/time columns.</p>
+<pre><code>.whereDate("createdAt", LocalDate.of(2026, 5, 31))</code></pre>
+                </div>
+                <div class="card anchor" id="method-json">
+                    <h3>whereJson</h3>
+                    <p>PostgreSQL JSON containment filter.</p>
+<pre><code>.whereJson("meta", Map.of("kind", "HQ"))</code></pre>
+                </div>
+                <div class="card anchor" id="method-in">
+                    <h3>whereIn</h3>
+                    <p>Use for batch filtering. Empty collections short-circuit to no rows.</p>
+<pre><code>.whereIn("id", ids)</code></pre>
+                </div>
+                <div class="card anchor" id="method-has">
+                    <h3>whereHas / whereHasIn</h3>
+                    <p>Filter the parent based on child relation existence.</p>
+<pre><code>.whereHas("users", q -&gt; q.where("status", "ACTIVE"))
+.whereHasIn("users", "id", List.of(10L, 11L))</code></pre>
+                </div>
+                <div class="card anchor" id="method-order">
+                    <h3>orderBy</h3>
+                    <p>Explicit order direction is supported and recommended.</p>
+<pre><code>.orderBy("id", "ASC")
+.orderByDesc("id")</code></pre>
+                </div>
+                <div class="card anchor" id="method-page">
+                    <h3>page / size / limit / offset</h3>
+                    <p>Offset paging for normal queries and relation-local limits.</p>
+<pre><code>.page(1).size(20)
+.limit(10)
+.offset(0)</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="section anchor" id="relations">
+            <h2>Relation Types</h2>
+            <ul>
+                <li><strong>hasOne</strong>: parent to one child via local key and child key.</li>
+                <li><strong>hasMany</strong>: parent to many children via local key and child foreign key.</li>
+                <li><strong>belongsTo</strong>: child points to one parent via foreign key.</li>
+                <li><strong>belongsToMany</strong>: many-to-many through pivot table.</li>
+                <li><strong>hasOneThroughPivot</strong>: one related row selected through pivot with an extra pivot filter.</li>
+            </ul>
+<pre><code>registry.forClass(User.class)
+    .table("comission.users")
+    .primaryKey("id")
+    .hasMany("orders", Order.class, User::getId, Order::getUserId, User::setOrders)
+    .register();</code></pre>
+        </section>
+
+        <section class="section anchor" id="with">
+            <h2>Eager Loading</h2>
+            <p>
+                Use <code>with(...)</code> to batch-load relations. Nested paths are supported, for example
+                <code>with("users.orders")</code>.
+            </p>
+<pre><code>eloquent.query(Department.class)
+    .with("users", q -&gt; q.select("id", "username").orderBy("id").limitPerParent(3))
+    .with("users.orders", q -&gt; q.select("id", "amount", "user_id"))
+    .with("manager")
+    .get();</code></pre>
+            <div class="note">
+                Relation callbacks can reuse <code>select</code>, <code>where</code>, <code>orderBy</code>, <code>limit</code>,
+                and the other filtering methods. This keeps child SQL explicit and batch-friendly.
+            </div>
+        </section>
+
+        <section class="section anchor" id="write">
+            <h2>Write / Mutation</h2>
+            <p>
+                Mutation APIs live under <code>eloquent.write(Entity.class)</code>. This keeps the read path clean and makes
+                side effects explicit. The current write facade focuses on plain inserts, updates, upsert-by-primary-key, and
+                pivot mutation for <code>belongsToMany</code>.
+            </p>
+            <div class="grid">
+                <div class="card anchor" id="method-create">
+                    <h3>create(...) / createMany(...)</h3>
+                    <p>Insert one entity or a collection of entities using the registered table metadata.</p>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+writer.create(User.builder()
+    .id(100L)
+    .username("alice")
+    .status(StatusEnum.UserStatus.ACTIVE)
+    .createdAt(ZonedDateTime.now())
+    .updatedAt(ZonedDateTime.now())
+    .build());
+
+writer.createMany(List.of(
+    User.builder().id(101L).username("bob").status(StatusEnum.UserStatus.ACTIVE).build(),
+    User.builder().id(102L).username("carol").status(StatusEnum.UserStatus.ACTIVE).build()
+));</code></pre>
+                </div>
+                <div class="card anchor" id="method-update">
+                    <h3>update(...) / updatePartial(...) / updatePartialByMap(...) / updatePartialByMap(id, ...) / upsert(...)</h3>
+                    <p><code>update</code> writes all simple fields. <code>updatePartial</code> only touches the fields you list. <code>updatePartialByMap</code> is useful when the patch comes from a DTO or request map. The <code>(id, patch)</code> overload updates directly without loading the entity first. <code>upsert</code> updates first, then inserts if the row is missing.</p>
+                    <div class="grid">
+                        <div class="card">
+                            <h3 style="margin-top:0">update(...)</h3>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+User user = eloquent.query(User.class).find(1L);
+user.setUsername("alice.updated");
+user.setStatus("ACTIVE");
+writer.update(user);</code></pre>
+                        </div>
+                        <div class="card">
+                            <h3 style="margin-top:0">updatePartial(...)</h3>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+User user = eloquent.query(User.class).find(1L);
+user.setUsername("alice.patched");
+user.setStatus(null);
+writer.updatePartial(user, "username", "status");</code></pre>
+                        </div>
+                    </div>
+                    <div class="card" style="margin-top:16px">
+                        <h3 style="margin-top:0">updatePartialByMap(...) / updatePartialByMap(id, ...)</h3>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+Map&lt;String, Object&gt; patch = new LinkedHashMap&lt;&gt;();
+patch.put("username", "alice.map");
+patch.put("updated_at", null);
+
+User user = eloquent.query(User.class).find(1L);
+writer.updatePartialByMap(user, patch);
+eloquent.updatePartialByMap(User.class, 1L, patch);</code></pre>
+                    </div>
+                    <div class="card" style="margin-top:16px">
+                        <h3 style="margin-top:0">upsert(...)</h3>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+User newUser = new User();
+newUser.setId(200L);
+newUser.setUsername("new-user");
+newUser.setStatus(StatusEnum.UserStatus.ACTIVE);
+writer.upsert(newUser);</code></pre>
+                    </div>
+                    <div class="note">
+                        Use <code>updatePartial(...)</code> when you want a patch-style write. Fields you do not list stay untouched,
+                        while listed fields can still be set to <code>null</code> explicitly. Use <code>updatePartialByMap(...)</code>
+                        when you already have a key/value patch object from API input. Use the <code>(id, patch)</code> overload
+                        when you want to patch directly without loading the entity first.
+                    </div>
+                </div>
+                <div class="card anchor" id="method-pivot-attach">
+                    <h3>attach(...) / detach(...) / dettach(...)</h3>
+                    <p>Attach or remove rows in a many-to-many pivot table. Current support targets <code>belongsToMany</code>.</p>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+writer.attach("roles", 1L, List.of(10L, 11L));
+writer.detach("roles", 1L, List.of(10L));
+
+// Alias kept for backward compatibility with a typo in older code
+writer.dettach("roles", 1L, List.of(11L));</code></pre>
+                    <div class="note">
+                        If your pivot table has extra columns, attach or sync a per-id map of pivot attributes:
+<pre><code>writer.attach("users", departmentId, Map.of(
+    15L, Map.of("role_code", "STAFF", "level_no", 1),
+    16L, Map.of("role_code", "MANAGER", "level_no", 2)
+));
+
+writer.sync("users", departmentId, Map.of(
+    15L, Map.of("role_code", "STAFF", "level_no", 1),
+    16L, Map.of("role_code", "MANAGER", "level_no", 2)
+));
+
+writer.syncWithoutDetaching("users", departmentId, Map.of(
+    17L, Map.of("role_code", "VIEWER", "level_no", 3)
+));</code></pre>
+                    </div>
+                </div>
+                <div class="card anchor" id="method-pivot-sync">
+                    <h3>sync(...) / syncWithoutDetaching(...)</h3>
+                    <p>
+                        <code>sync</code> replaces the current pivot set with the provided ids.
+                        <code>syncWithoutDetaching</code> only adds missing ids and keeps existing links.
+                    </p>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+writer.sync("roles", 1L, List.of(10L, 12L));
+writer.syncWithoutDetaching("roles", 1L, List.of(13L, 14L));
+
+// Backward-compatible alias
+writer.syncWithoutDetachting("roles", 1L, List.of(15L));</code></pre>
+                </div>
+                <div class="card anchor" id="method-mutation-preview">
+                    <h3>previewAttachSql(...) / previewDetachSql(...) / previewSyncSql(...)</h3>
+                    <p>
+                        These helpers return compact SQL previews for pivot writes. They are useful when you want to log the
+                        SQL before mutating data, for example in controllers or benchmark endpoints.
+                    </p>
+<pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
+
+log.info("attach preview: {}", writer.previewAttachSql("roles", 1L, List.of(10L, 11L)));
+log.info("detach preview: {}", writer.previewDetachSql("roles", 1L, List.of(10L)));
+
+log.info("sync preview: {}", writer.previewSyncSql("users", departmentId, Map.of(
+    15L, Map.of("role_code", "STAFF", "level_no", 1),
+    16L, Map.of("role_code", "MANAGER", "level_no", 2)
+)));</code></pre>
+                </div>
+            </div>
+            <div class="note warn">
+                Mutation APIs currently work on <code>belongsToMany</code> relations for pivot operations. Root <code>create</code>,
+                <code>update</code>, and <code>upsert</code> work on any registered entity table.
+            </div>
+        </section>
+
+        <section class="section anchor" id="terminal">
+            <h2>Terminal Methods</h2>
+            <div class="grid">
+                <div class="card anchor" id="method-first-find">
+                    <h3>first()</h3>
+                    <p>Returns the first row for the current query state, or <code>null</code> when empty.</p>
+<pre><code>Department department = eloquent.query(Department.class)
+    .where("status", "ACTIVE")
+    .orderByDesc("id")
+    .first();</code></pre>
+                </div>
+                <div class="card">
+                    <h3>find(id)</h3>
+                    <p>Shortcut for primary-key lookup using the registered metadata.</p>
+<pre><code>Department department = eloquent.query(Department.class)
+    .with("users")
+    .find(1L);</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="section anchor" id="paging">
+            <h2>Pagination</h2>
+            <div class="grid">
+                <div class="card anchor" id="method-paginate">
+                    <h3>paginate(page, size)</h3>
+                    <p>Offset pagination with metadata: total rows, total pages, has next, has previous.</p>
+<pre><code>PaginatedResult&lt;Department&gt; page = eloquent.query(Department.class)
+    .where("status", "ACTIVE")
+    .orderBy("id", "ASC")
+    .paginate(1, 20);</code></pre>
+                </div>
+                <div class="card anchor" id="method-cursor">
+                    <h3>cursorPaginate(lastId, size)</h3>
+                    <p>Keyset pagination optimized for large tables. Cursor is the primary key by design.</p>
+<pre><code>CursorPaginatedResult&lt;User&gt; page = eloquent.query(User.class)
+    .orderBy("id", "DESC")
+    .cursorPaginate(null, 20);</code></pre>
+                </div>
+            </div>
+            <div class="note warn">
+                For cursor pagination, the current implementation supports ordering by the primary key only. Use
+                <code>null</code> for the first page. Then pass <code>nextCursorId()</code> into the next request.
+            </div>
+        </section>
+
+        <section class="section anchor" id="sql">
+            <h2>SQL Preview</h2>
+            <p>
+                Use these methods to inspect generated SQL in logs or during debugging.
+            </p>
+            <ul>
+                <li><code>toSql()</code> - root query only</li>
+                <li><code>toDebugSql()</code> - root query with literal values</li>
+                <li><code>toSqls()</code> - root + eager load SQL list</li>
+                <li><code>toDebugSqls()</code> - compact debug SQL list for ELK or logs</li>
+            </ul>
+<pre><code>List&lt;String&gt; sqls = eloquent.query(Department.class)
+    .select("id", "code")
+    .with("users", q -&gt; q.select("id", "username"))
+    .toDebugSqls();</code></pre>
+        </section>
+
+        <section class="section anchor" id="examples">
+            <h2>Practical Example</h2>
+<pre><code>List&lt;Department&gt; departments = eloquent.query(Department.class)
+    .select("id", "code", "name")
+    .where("id", "&gt;", 0L)
+    .with("users", q -&gt; q
+        .select("id", "username", "fullname")
+        .orderBy("id", "ASC")
+        .limitPerParent(3))
+    .with("manager")
+    .orderBy("id", "DESC")
+    .cursorPaginate(null, 20)
+    .items();</code></pre>
+            <p class="muted">
+                This keeps the SQL explicit, batch-loaded, and predictable for debugging and benchmarking.
+            </p>
+        </section>
+
+        <div class="footer">
+            File location: <code>src/main/java/io/github/phuonghuu/eloquent/docs/EloquentGuide.html</code>
+        </div>
+    </main>
+</div>
+<script>
+    (function () {
+        const themeToggle = document.getElementById('themeToggle');
+        const themeToggleIcon = document.getElementById('themeToggleIcon');
+        const navFilter = document.getElementById('navFilter');
+        const links = Array.from(document.querySelectorAll('.nav-list a'));
+        const root = document.documentElement;
+        const storageKey = 'relationkit-guide-theme';
+
+        function renderThemeIcon(theme) {
+            if (theme === 'light') {
+                themeToggleIcon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M4.93 4.93l1.41 1.41"></path><path d="M17.66 17.66l1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M4.93 19.07l1.41-1.41"></path><path d="M17.66 6.34l1.41-1.41"></path></svg>';
+            } else {
+                themeToggleIcon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3c-1.7 2.1-2.18 5.02-1.09 7.52A7 7 0 0 0 21 12.79z"></path></svg>';
+            }
+        }
+
+        function applyTheme(theme) {
+            root.setAttribute('data-theme', theme);
+            renderThemeIcon(theme);
+            try {
+                localStorage.setItem(storageKey, theme);
+            } catch (error) {
+                // Ignore storage failures in restricted browsers or file:// contexts.
+            }
+        }
+
+        let savedTheme = null;
+        try {
+            savedTheme = localStorage.getItem(storageKey);
+        } catch (error) {
+            savedTheme = null;
+        }
+        applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+
+        themeToggle.addEventListener('click', function () {
+            const current = root.getAttribute('data-theme') || 'dark';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        navFilter.addEventListener('input', function () {
+            const term = navFilter.value.trim().toLowerCase();
+            links.forEach(function (link) {
+                const match = link.textContent.toLowerCase().includes(term);
+                link.classList.toggle('hidden', term.length > 0 && !match);
+            });
+        });
+    })();
+</script>
+</body>
+</html>
+

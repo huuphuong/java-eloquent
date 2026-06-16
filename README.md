@@ -24,12 +24,12 @@ and performing basic write operations without introducing a full ORM layer.
 If you want to publish this project as a Maven artifact, the current coordinates are:
 
 ```xml
-<groupId>io.github.phuonghuu</groupId>
+<groupId>io.github.huuphuong</groupId>
 <artifactId>java-eloquent</artifactId>
-<version>0.1.1</version>
+<version>0.1.0</version>
 ```
 
-Before publishing a release, replace the snapshot version with a real release version such as `1.0.0`.
+This repository is already on a release version, so use the same version when consuming it locally or from a repository.
 
 ## Installation
 
@@ -37,9 +37,9 @@ If the artifact is already published, add it to your application like this:
 
 ```xml
 <dependency>
-    <groupId>io.github.phuonghuu</groupId>
+    <groupId>io.github.huuphuong</groupId>
     <artifactId>java-eloquent</artifactId>
-    <version>1.0.0</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -60,7 +60,7 @@ The compiled JAR will be generated under `target/`.
 
 ## Main Entry Points
 
-- `RelationKit` is the main facade for reading and writing
+- `Eloquent` is the main facade for reading and writing
 - `RelationRegistry` is used to register metadata and relations
 - `QueryBuilder` powers fluent queries
 - `RelationWriter` handles inserts, updates, and pivot mutations
@@ -81,10 +81,10 @@ registry.forClass(User.class)
     .register();
 ```
 
-### 2. Create a `RelationKit`
+### 2. Create an `Eloquent` instance
 
 ```java
-RelationKit kit = RelationKit.of(jdbcTemplate, registry);
+Eloquent kit = Eloquent.of(jdbcTemplate, registry);
 ```
 
 ### 3. Query data
@@ -149,7 +149,7 @@ kit.query(Department.class)
 
 ## Writing Data
 
-Write operations are available through `relationKit.write(Entity.class)`.
+Write operations are available through `kit.write(Entity.class)`.
 
 Supported operations include:
 
@@ -214,14 +214,24 @@ This is useful for debugging, logging, and writing tests around generated SQL.
 
 ## Publishing
 
-If you want to publish this project as a reusable Maven artifact, the usual flow is:
+This project is configured for Maven Central publishing through the Central Publisher Portal.
+
+### Release checklist
+
+Before publishing, make sure:
+
+- the version in `pom.xml` is a release version and not a `-SNAPSHOT`
+- your Git working tree is clean
+- your GPG key is configured locally
+- your Maven `settings.xml` contains the Central Portal token
+- the `README.md` and `LICENSE` files are up to date
 
 ### 1. Update the version
 
-Change the version in `pom.xml` from `1.0-SNAPSHOT` to a release version:
+Change the version in `pom.xml` to the release version you want to publish:
 
 ```xml
-<version>1.0.0</version>
+<version>0.1.0</version>
 ```
 
 ### 2. Run the full build
@@ -231,28 +241,54 @@ mvn clean test
 mvn clean package
 ```
 
-### 3. Install locally for validation
+### 3. Verify local signing and metadata
+
+The build is configured to attach:
+
+- sources JAR
+- javadocs JAR
+- GPG signatures
+
+If your GPG setup is not ready yet, fix that before deploying.
+
+### 4. Install locally for validation
 
 ```bash
 mvn clean install
 ```
 
-### 4. Configure your repository
+### 5. Configure Maven Central access
 
-For a real publish, configure:
+Create or update `~/.m2/settings.xml` with your Central Portal token:
 
-- `distributionManagement` in `pom.xml`
-- credentials in Maven `settings.xml`
-- signing if your target repository requires it
+```xml
+<settings>
+  <servers>
+    <server>
+      <id>central</id>
+      <username>YOUR_TOKEN_USERNAME</username>
+      <password>YOUR_TOKEN_PASSWORD</password>
+    </server>
+  </servers>
+</settings>
+```
 
-### 5. Deploy
+### 6. Deploy
 
 ```bash
 mvn clean deploy
 ```
+
+After `deploy`, the bundle is uploaded to the Central Publisher Portal for validation.
+You can publish it manually from the portal, or enable automatic publishing in the plugin if you prefer CI-driven releases.
+
+### 7. Confirm the release
+
+After the release is approved, verify the artifact on Maven Central search.
 
 ## Notes
 
 - The codebase targets Java 8 language features.
 - The package is intentionally small and explicit, so SQL generation stays easy to inspect.
 - Test coverage focuses on relation behavior, query generation, and SQL preview output.
+- The repository now includes an MIT `LICENSE` file for Central-friendly publishing.
