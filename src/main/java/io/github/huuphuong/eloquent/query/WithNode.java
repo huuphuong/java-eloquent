@@ -132,14 +132,6 @@ public final class WithNode {
         addPredicate("OR", FilterCondition.date(column, value));
     }
 
-    public void whereJson(String column, Object value) {
-        addPredicate("AND", FilterCondition.jsonContains(column, value));
-    }
-
-    public void orWhereJson(String column, Object value) {
-        addPredicate("OR", FilterCondition.jsonContains(column, value));
-    }
-
     public void orderBy(String column, String direction) {
         if (!TextUtils.isBlank(column)) {
             orderBy.add(new OrderClause(column, direction == null ? "ASC" : direction));

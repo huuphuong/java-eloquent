@@ -8,9 +8,13 @@ import io.github.huuphuong.eloquent.query.SqlStatement;
 import io.github.huuphuong.eloquent.support.TextUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
 import java.beans.PropertyDescriptor;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -42,15 +46,12 @@ public final class RelationWriter<T> {
         return entity;
     }
 
-    public List<T> createMany(Collection<T> entities) {
-        if (entities == null || entities.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<T> result = new ArrayList<>();
-        for (T entity : entities) {
-            result.add(create(entity));
-        }
-        return result;
+    public boolean insertBatch(Collection<T> entities) {
+        return insertBatchInternal(entities);
+    }
+
+    public boolean insertBatchIgnoreError(Collection<T> entities) {
+        return insertBatchInternal(entities);
     }
 
     public int update(T entity) {
@@ -626,6 +627,77 @@ public final class RelationWriter<T> {
         return sql.toString();
     }
 
+    private boolean insertBatchInternal(Collection<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return true;
+        }
+
+        RelationRegistry.EntityMeta<T> meta = registry.require(type);
+        try {
+            List<InsertBatchGroup> groups = buildInsertBatchGroups(meta, entities);
+            DataSource dataSource = resolveDataSource();
+            if (dataSource == null) {
+                return executeBatchGroups(groups);
+            }
+
+            TransactionTemplate transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
+            Boolean committed = transactionTemplate.execute(status -> {
+                boolean success = executeBatchGroups(groups);
+                if (!success) {
+                    status.setRollbackOnly();
+                    return false;
+                }
+                return true;
+            });
+            return Boolean.TRUE.equals(committed);
+        } catch (RuntimeException ex) {
+            return false;
+        }
+    }
+
+    private boolean executeBatchGroups(List<InsertBatchGroup> groups) {
+        try {
+            for (InsertBatchGroup group : groups) {
+                jdbcTemplate.batchUpdate(group.sql, group.params.toArray(new MapSqlParameterSource[0]));
+            }
+            return true;
+        } catch (RuntimeException ex) {
+            return false;
+        }
+    }
+
+    private List<InsertBatchGroup> buildInsertBatchGroups(RelationRegistry.EntityMeta<T> meta, Collection<T> entities) {
+        LinkedHashMap<String, InsertBatchGroup> groups = new LinkedHashMap<>();
+        for (T entity : entities) {
+            if (entity == null) {
+                throw new IllegalArgumentException("entity is required");
+            }
+
+            Map<String, Object> values = extractInsertValues(meta, entity);
+            if (values.isEmpty()) {
+                throw new IllegalStateException("No writable properties found for " + type.getName());
+            }
+
+            String signature = String.join("\u0000", values.keySet());
+            InsertBatchGroup group = groups.get(signature);
+            if (group == null) {
+                group = new InsertBatchGroup(buildInsertSql(meta.table(), values));
+                groups.put(signature, group);
+            }
+            group.params.add(new MapSqlParameterSource(values));
+        }
+        return new ArrayList<>(groups.values());
+    }
+
+    private DataSource resolveDataSource() {
+        try {
+            JdbcTemplate template = jdbcTemplate.getJdbcTemplate();
+            return template == null ? null : template.getDataSource();
+        } catch (RuntimeException ex) {
+            return null;
+        }
+    }
+
     private LinkedHashSet<Object> normalizeIdSet(Collection<?> ids) {
         LinkedHashSet<Object> values = new LinkedHashSet<>();
         if (ids == null) {
@@ -713,6 +785,15 @@ public final class RelationWriter<T> {
 
     private static Object propertyValue(Object target, String property) {
         return new BeanWrapperImpl(target).getPropertyValue(property);
+    }
+
+    private static final class InsertBatchGroup {
+        private final String sql;
+        private final List<MapSqlParameterSource> params = new ArrayList<>();
+
+        private InsertBatchGroup(String sql) {
+            this.sql = sql;
+        }
     }
 
     private static Object normalizeWriteValue(Object value) {

@@ -59,10 +59,10 @@ class RelationWriterBehaviorTest {
     }
 
     @Test
-    void createManyCreatesEachEntityIndividually() {
+    void insertBatchInsertsAllEntitiesInOneBatchGroup() {
         RelationRegistry registry = userRegistry();
         NamedParameterJdbcTemplate jdbcTemplate = Mockito.mock(NamedParameterJdbcTemplate.class);
-        when(jdbcTemplate.update(anyString(), any(MapSqlParameterSource.class))).thenReturn(1);
+        when(jdbcTemplate.batchUpdate(anyString(), any(MapSqlParameterSource[].class))).thenReturn(new int[]{1, 1});
 
         RelationWriter<UserEntity> writer = new RelationWriter<>(jdbcTemplate, registry, UserEntity.class);
         UserEntity first = new UserEntity();
@@ -70,10 +70,31 @@ class RelationWriterBehaviorTest {
         UserEntity second = new UserEntity();
         second.setUsername("bob");
 
-        List<UserEntity> result = writer.createMany(Arrays.asList(first, second));
+        boolean result = writer.insertBatch(Arrays.asList(first, second));
 
-        assertEquals(2, result.size());
-        verify(jdbcTemplate, times(2)).update(anyString(), any(MapSqlParameterSource.class));
+        assertTrue(result);
+        ArgumentCaptor<MapSqlParameterSource[]> batchCaptor = ArgumentCaptor.forClass(MapSqlParameterSource[].class);
+        verify(jdbcTemplate).batchUpdate(anyString(), batchCaptor.capture());
+        assertEquals(2, batchCaptor.getValue().length);
+        assertEquals("alice", batchCaptor.getValue()[0].getValue("username"));
+        assertEquals("bob", batchCaptor.getValue()[1].getValue("username"));
+    }
+
+    @Test
+    void insertBatchIgnoreErrorReturnsFalseWhenBatchFails() {
+        RelationRegistry registry = userRegistry();
+        NamedParameterJdbcTemplate jdbcTemplate = Mockito.mock(NamedParameterJdbcTemplate.class);
+        when(jdbcTemplate.batchUpdate(anyString(), any(MapSqlParameterSource[].class)))
+            .thenThrow(new RuntimeException("duplicate key"));
+
+        RelationWriter<UserEntity> writer = new RelationWriter<>(jdbcTemplate, registry, UserEntity.class);
+        UserEntity entity = new UserEntity();
+        entity.setUsername("alice");
+
+        boolean result = writer.insertBatchIgnoreError(Collections.singletonList(entity));
+
+        assertFalse(result);
+        verify(jdbcTemplate).batchUpdate(anyString(), any(MapSqlParameterSource[].class));
     }
 
     @Test

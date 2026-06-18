@@ -477,8 +477,8 @@
             </p>
             <div class="grid">
                 <div class="card anchor" id="method-create">
-                    <h3>create(...) / createMany(...)</h3>
-                    <p>Insert one entity or a collection of entities using the registered table metadata.</p>
+                    <h3>create(...) / insertBatch(...) / insertBatchIgnoreError(...)</h3>
+                    <p>Insert one entity or insert a collection in batch using the registered table metadata.</p>
 <pre><code>RelationWriter&lt;User&gt; writer = eloquent.write(User.class);
 
 writer.create(User.builder()
@@ -489,7 +489,7 @@ writer.create(User.builder()
     .updatedAt(ZonedDateTime.now())
     .build());
 
-writer.createMany(List.of(
+writer.insertBatch(List.of(
     User.builder().id(101L).username("bob").status(StatusEnum.UserStatus.ACTIVE).build(),
     User.builder().id(102L).username("carol").status(StatusEnum.UserStatus.ACTIVE).build()
 ));</code></pre>

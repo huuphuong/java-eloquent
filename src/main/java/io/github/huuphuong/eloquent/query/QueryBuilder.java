@@ -162,16 +162,6 @@ public final class QueryBuilder<T> implements Query<T> {
         return this;
     }
 
-    public QueryBuilder<T> whereJson(String column, Object value) {
-        addPredicate("AND", FilterCondition.jsonContains(column, value));
-        return this;
-    }
-
-    public QueryBuilder<T> orWhereJson(String column, Object value) {
-        addPredicate("OR", FilterCondition.jsonContains(column, value));
-        return this;
-    }
-
     public QueryBuilder<T> whereIn(String column, Collection<?> values) {
         if (values == null || values.isEmpty()) {
             alwaysEmpty = true;

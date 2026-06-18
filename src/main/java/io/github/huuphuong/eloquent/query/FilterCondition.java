@@ -1,7 +1,5 @@
 package io.github.huuphuong.eloquent.query;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.huuphuong.eloquent.meta.RelationRegistry;
 import io.github.huuphuong.eloquent.support.TextUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -25,12 +23,10 @@ final class FilterCondition implements QueryPredicate {
         BETWEEN,
         LIKE,
         DATE,
-        JSON_CONTAINS,
         RAW
     }
 
     private static final Pattern QUESTION_MARK_PATTERN = Pattern.compile("\\?");
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final Kind kind;
     private final String column;
@@ -78,10 +74,6 @@ final class FilterCondition implements QueryPredicate {
 
     static FilterCondition date(String column, Object value) {
         return new FilterCondition(Kind.DATE, column, "DATE", value, null, null);
-    }
-
-    static FilterCondition jsonContains(String column, Object value) {
-        return new FilterCondition(Kind.JSON_CONTAINS, column, "@>", value, null, null);
     }
 
     static FilterCondition raw(String expression, List<?> values) {
@@ -148,11 +140,6 @@ final class FilterCondition implements QueryPredicate {
             params.addValue(param, normalizeDateValue(value));
             return "DATE(" + columnName + ") = :" + param;
         }
-        if (kind == Kind.JSON_CONTAINS) {
-            String param = "p_" + index;
-            params.addValue(param, toJsonValue(value));
-            return columnName + "::jsonb @> :" + param + "::jsonb";
-        }
         return renderRaw(params, index);
     }
 
@@ -199,18 +186,5 @@ final class FilterCondition implements QueryPredicate {
         return value;
     }
 
-    private static String toJsonValue(Object value) {
-        if (value == null) {
-            return "null";
-        }
-        if (value instanceof String) {
-            return (String) value;
-        }
-        try {
-            return OBJECT_MAPPER.writeValueAsString(value);
-        } catch (JsonProcessingException exception) {
-            throw new IllegalArgumentException("Unable to serialize JSON value for whereJson", exception);
-        }
-    }
 }
 

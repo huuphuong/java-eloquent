@@ -27,17 +27,6 @@ class FilterConditionTest {
     }
 
     @Test
-    void rendersJsonContainsSql() {
-        FilterCondition condition = FilterCondition.jsonContains("meta", new Payload("HQ"));
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
-        String sql = condition.toSql(params, 1);
-
-        assertEquals("meta::jsonb @> :p_1::jsonb", sql);
-        assertEquals("{\"kind\":\"HQ\"}", params.getValue("p_1"));
-    }
-
-    @Test
     void normalizesDateValuesFromDifferentTemporalTypes() {
         MapSqlParameterSource localDateParams = new MapSqlParameterSource();
         String localDateSql = FilterCondition.date("createdAt", LocalDate.of(2024, 6, 15)).toSql(localDateParams, 0);
@@ -64,31 +53,5 @@ class FilterConditionTest {
         assertThrows(IllegalArgumentException.class, () -> FilterCondition.raw("level_no > ?", Arrays.asList(3, "ACTIVE")).toSql(params, 4));
     }
 
-    @Test
-    void rejectsUnserializableJsonValues() {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
-        assertThrows(IllegalArgumentException.class, () -> FilterCondition.jsonContains("meta", new UnserializablePayload()).toSql(params, 5));
-    }
-
-    public static final class Payload {
-        private final String kind;
-
-        public Payload(String kind) {
-            this.kind = kind;
-        }
-
-        public String getKind() {
-            return kind;
-        }
-    }
-
-    public static final class UnserializablePayload {
-        private final UnserializablePayload self = this;
-
-        public UnserializablePayload getSelf() {
-            return self;
-        }
-    }
 }
 
